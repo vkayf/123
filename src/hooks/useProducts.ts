@@ -16,9 +16,24 @@ export const useProducts = () => {
     }
   };
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+useEffect(() => {
+  fetchProducts();
+
+  const channel = supabase
+    .channel("products-realtime")
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "products" },
+      () => {
+        fetchProducts();
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}, []);
 
   const addProduct = async (product: any) => {
     const { error } = await supabase
