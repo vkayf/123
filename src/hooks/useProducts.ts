@@ -2,32 +2,32 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 export const useProducts = () => {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<any[]>([]);
 
-  // Загрузка
   const fetchProducts = async () => {
     const { data, error } = await supabase
       .from("products")
       .select("*");
 
-    if (!error) setProducts(data || []);
+    if (error) {
+      console.error("Ошибка загрузки:", error);
+    } else {
+      setProducts(data || []);
+    }
   };
 
   useEffect(() => {
     fetchProducts();
   }, []);
 
-  // Добавление
   const addProduct = async (product: any) => {
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("products")
-      .insert([product])
-      .select();
+      .insert([product]);
 
     if (!error) fetchProducts();
   };
 
-  // Обновление
   const updateProduct = async (id: string, updates: any) => {
     await supabase
       .from("products")
@@ -37,7 +37,6 @@ export const useProducts = () => {
     fetchProducts();
   };
 
-  // Удаление
   const deleteProduct = async (id: string) => {
     await supabase
       .from("products")
